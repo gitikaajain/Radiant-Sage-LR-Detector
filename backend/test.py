@@ -1,50 +1,32 @@
 import cv2
 import mediapipe as mp
+# Import the required module for text 
+# to speech conversion
+from gtts import gTTS
+
+# This module is imported so that we can 
+# play the converted audio
+import os
+from playsound import playsound
+import pygame
+
+
+
+# pygame.quit()
+
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_hands = mp.solutions.hands
 
-# # For static images:
-# IMAGE_FILES = []
-# with mp_hands.Hands(
-#     static_image_mode=True,
-#     max_num_hands=2,
-#     min_detection_confidence=0.5) as hands:
-#   for idx, file in enumerate(IMAGE_FILES):
-#     # Read an image, flip it around y-axis for correct handedness output (see
-#     # above).
-#     image = cv2.flip(cv2.imread(file), 1)
-#     # Convert the BGR image to RGB before processing.
-#     results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-
-#     # Print handedness and draw hand landmarks on the image.
-#     print('Handedness:', results.multi_handedness)
-#     if not results.multi_hand_landmarks:
-#       continue
-#     image_height, image_width, _ = image.shape
-#     annotated_image = image.copy()
-#     for hand_landmarks in results.multi_hand_landmarks:
-#       print('hand_landmarks:', hand_landmarks)
-#       print(
-#           f'Index finger tip coordinates: (',
-#           f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].x * image_width}, '
-#           f'{hand_landmarks.landmark[mp_hands.HandLandmark.INDEX_FINGER_TIP].y * image_height})'
-#       )
-#       mp_drawing.draw_landmarks(
-#           annotated_image,
-#           hand_landmarks,
-#           mp_hands.HAND_CONNECTIONS,
-#           mp_drawing_styles.get_default_hand_landmarks_style(),
-#           mp_drawing_styles.get_default_hand_connections_style())
-#     cv2.imwrite(
-#         '/tmp/annotated_image' + str(idx) + '.png', cv2.flip(annotated_image, 1))
-#     # Draw hand world landmarks.
-#     if not results.multi_hand_world_landmarks:
-#       continue
-#     for hand_world_landmarks in results.multi_hand_world_landmarks:
-#       mp_drawing.plot_landmarks(
-#         hand_world_landmarks, mp_hands.HAND_CONNECTIONS, azimuth=5)
 print('hello')
+import threading
+def alert():
+  pass
+    # pygame.init()
+    # pygame.mixer.music.load('welcome.wav')
+    # pygame.mixer.music.play()
+    # threading.Thread(target=playsound, args=('welcome.wav',), daemon=True).start()
+
 # For webcam input:
 cap = cv2.VideoCapture(0)
 with mp_hands.Hands(
@@ -77,6 +59,26 @@ with mp_hands.Hands(
             mp_drawing_styles.get_default_hand_connections_style())
     # Flip the image horizontally for a selfie-view display.
     cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
+    ans = results.multi_handedness
+    if(ans == None):
+      # # The text that you want to convert to audio
+      # mytext = 'Hand input not received'
+      # # Language in which you want to convert
+      # language = 'en'
+      # # Passing the text and language to the engine, 
+      # # here we have marked slow=False. Which tells 
+      # # the module that the converted audio should 
+      # # have a high speed
+      # myobj = gTTS(text=mytext, lang=language, slow=False)
+      # # Saving the converted audio in a mp3 file named
+      # # welcome 
+      # myobj.save("welcome.mp3")
+      # # Playing the converted file
+      # os.system("mpg321 welcome.mp3")
+      alert()
+    else:
+      print(ans[0].classification[0].label)
+    # print(results.multi_handedness)
     if cv2.waitKey(5) & 0xFF == 27:
       break
 cap.release()
