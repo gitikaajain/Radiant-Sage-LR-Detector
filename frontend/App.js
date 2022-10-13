@@ -14,10 +14,9 @@
 // 	);
 // };
 // export default App;
-
+import { useEffect, useRef, useState } from "react";
 import { Home } from "./screens/Home";
 import { Activity } from "./screens/Activity";
-
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
