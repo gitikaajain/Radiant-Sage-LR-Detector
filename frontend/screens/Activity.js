@@ -15,34 +15,46 @@ import { Camera } from "expo-camera";
 import { shareAsync } from "expo-sharing";
 import * as MediaLibrary from "expo-media-library";
 import { useEffect, useRef, useState } from "react";
+import * as FS from 'expo-file-system';
+import Constants from "expo-constants";
+import axios from 'axios';
+
+const { manifest } = Constants;
+
+const uriii = `http://${manifest.debuggerHost.split(':').shift()}:4000`;
+console.log("URII", uriii);
 
 async function sendToServer(obj) {
-	// console.log("====================================");
 
-	// console.log("====================================");
-	let type = obj.type;
+	// defining connection constructs
 	let schema = "http://";
-	let host = "192.168.1.6";
+	let host = "192.168.29.245";
 	let route = "/scan";
 	let port = "5000";
 	let url = "";
 	let content_type = "image/jpeg";
 
 	url = schema + host + ":" + port + route;
+	console.log(url);
 
-	// let response = await FS.uploadAsync(url, obj.uri, {
-	// 	headers: {
-	// 		"content-type": content_type,
-	// 	},
-	// 	httpMethod: "POST",
-	// 	uploadType: FS.FileSystemUploadType.BINARY_CONTENT,
-	// });
+	console.log("obj", obj);
 
-	// console.log("resp headers", response.headers);
-	// console.log("resp body", response.body);
-	console.log("====================================");
-	console.log("HELLO");
-	console.log("====================================");
+	// uploading captured image on backend
+	let response = await FS.uploadAsync(url, obj.uri, {
+		headers: {
+			"content-type": content_type,
+		},
+		httpMethod: "POST",
+		uploadType: FS.FileSystemUploadType.BINARY_CONTENT,
+	})
+		.then(resp => {
+			// response contains a number corresponding to the wav file that would be outputted
+			let audio_file_no = JSON.parse(resp.body)['audio_no']
+			console.log(audio_file_no);
+		})
+		.catch((err) => {
+			console.log("Err ", err);
+		})
 }
 
 export const Activity = ({ navigation, route }) => {
