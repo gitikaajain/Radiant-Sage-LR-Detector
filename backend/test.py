@@ -11,13 +11,12 @@ import os
 from playsound import playsound
 # import pygame
 
-
-
 def alert():
   playsound('./audios/np_input.wav')
 
-def voiceover(palm, side):
-  if(palm == 'Left'):
+def voiceover(hand, side):
+  print("hey")
+  if(hand == 'Left'):
     if(side == "palm"):
       return 1
     else:
@@ -27,10 +26,6 @@ def voiceover(palm, side):
       return 3
     else:
       return 4
-  
-    # playsound('./audios/left_palm.wav')
-  # elif(palm == 'Right'):
-    # playsound('./audios/right_palm.wav')
 
 def scan_image(img):
   mp_drawing = mp.solutions.drawing_utils
@@ -57,13 +52,22 @@ def scan_image(img):
       output = 0
       # alert()
     else:
+      hand = ans[0].classification[0].label
       thumb_x = results.multi_hand_landmarks[0].landmark[4].x
       pinky_x = results.multi_hand_landmarks[0].landmark[20].x
       side = "back"
-      if(thumb_x > pinky_x):
-        side = "palm"
-        output = voiceover(ans[0].classification[0].label, side)
+      print(hand)
+      print(thumb_x)
+      print(pinky_x)
+      if(hand == "Left"):
+        if(thumb_x > pinky_x):
+          output = 1
+        else:
+          output = 2
       else:
-        output = voiceover(ans[0].classification[0].label, side)
+        if(thumb_x > pinky_x):
+          output = 4
+        else:
+          output = 3
       print(output)
       return output

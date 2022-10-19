@@ -18,50 +18,71 @@ import { useEffect, useRef, useState } from "react";
 import * as FS from 'expo-file-system';
 import Constants from "expo-constants";
 import axios from 'axios';
+import { Audio } from 'expo-av';
+// import sounds from '../audios';
 
 const { manifest } = Constants;
+const AUDIOS = {
+	0: require('../audios/0.wav'), 
+	1: require('../audios/1.wav'),
+	2: require('../audios/2.wav'),
+	3: require('../audios/3.wav'),
+	4: require('../audios/4.wav'),
+	5: require('../audios/5.wav'),
+	6: require('../audios/6.wav'),
+}
 
 const uriii = `http://${manifest.debuggerHost.split(':').shift()}:4000`;
 console.log("URII", uriii);
 
-async function sendToServer(obj) {
-
-	// defining connection constructs
-	let schema = "http://";
-	let host = "192.168.29.245";
-	let route = "/scan";
-	let port = "5000";
-	let url = "";
-	let content_type = "image/jpeg";
-
-	url = schema + host + ":" + port + route;
-	console.log(url);
-
-	console.log("obj", obj);
-
-	// uploading captured image on backend
-	let response = await FS.uploadAsync(url, obj.uri, {
-		headers: {
-			"content-type": content_type,
-		},
-		httpMethod: "POST",
-		uploadType: FS.FileSystemUploadType.BINARY_CONTENT,
-	})
-		.then(resp => {
-			// response contains a number corresponding to the wav file that would be outputted
-			let audio_file_no = JSON.parse(resp.body)['audio_no']
-			console.log(audio_file_no);
-		})
-		.catch((err) => {
-			console.log("Err ", err);
-		})
-}
-
 export const Activity = ({ navigation, route }) => {
+
+	async function sendToServer(obj) {
+
+		// defining connection constructs
+		let schema = "http://";
+		let host = "192.168.29.245";
+		let route = "/scan";
+		let port = "5000";
+		let url = "";
+		let content_type = "image/jpeg";
+
+		url = schema + host + ":" + port + route;
+		console.log(url);
+
+		console.log("obj", obj);
+
+		// uploading captured image on backend
+		let response = await FS.uploadAsync(url, obj.uri, {
+			headers: {
+				"content-type": content_type,
+			},
+			httpMethod: "POST",
+			uploadType: FS.FileSystemUploadType.BINARY_CONTENT,
+		})
+			.then(async resp => {
+				// response contains a number corresponding to the wav file that would be outputted
+				let audio_file_no = JSON.parse(resp.body)['audio_no']
+				console.log(audio_file_no);
+				console.log('Loading Sound');
+				let audiopath = '../audios/' + String(audio_file_no) + '.wav';
+				console.log(audiopath);
+				const { sound } = await Audio.Sound.createAsync(AUDIOS[audio_file_no]);
+				setSound(sound);
+
+				console.log('Playing Sound');
+				await sound.playAsync();
+			})
+			.catch((err) => {
+				console.log("Err ", err);
+			})
+	}
+
 	let cameraRef = useRef();
 	const [hasCameraPermission, setHasCameraPermission] = useState();
 	const [hasMediaLibraryPermission, setHasMediaLibraryPermission] = useState();
 	const [photo, setPhoto] = useState();
+	const [sound, setSound] = React.useState();
 
 	useEffect(() => {
 		(async () => {
@@ -70,8 +91,13 @@ export const Activity = ({ navigation, route }) => {
 				await MediaLibrary.requestPermissionsAsync();
 			setHasCameraPermission(cameraPermission.status === "granted");
 			setHasMediaLibraryPermission(mediaLibraryPermission.status === "granted");
+			sound ? () => {
+				console.log('Unloading Sound');
+				sound.unloadAsync();
+			}
+				: undefined;
 		})();
-	}, []);
+	}, [sound]);
 
 	if (hasCameraPermission === undefined) {
 		return <Text>Requesting permissions...</Text>;
