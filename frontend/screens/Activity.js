@@ -8,7 +8,7 @@ import {
 	Button,
 } from "react-native";
 import { Appbar } from "react-native-paper";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Alert } from "react-native";
 import { HeaderComponent } from "../components/headerComponent";
 import { StackActions } from "@react-navigation/native";
 import { Camera } from "expo-camera";
@@ -19,11 +19,13 @@ import * as FS from 'expo-file-system';
 import Constants from "expo-constants";
 import axios from 'axios';
 import { Audio } from 'expo-av';
+import * as msh from '@mediapipe/hands';
+
 // import sounds from '../audios';
 
 const { manifest } = Constants;
 const AUDIOS = {
-	0: require('../audios/0.wav'), 
+	0: require('../audios/0.wav'),
 	1: require('../audios/1.wav'),
 	2: require('../audios/2.wav'),
 	3: require('../audios/3.wav'),
@@ -62,16 +64,35 @@ export const Activity = ({ navigation, route }) => {
 		})
 			.then(async resp => {
 				// response contains a number corresponding to the wav file that would be outputted
-				let audio_file_no = JSON.parse(resp.body)['audio_no']
+				let data = JSON.parse(resp.body)['data']
+				let audio_file_no = data[0]
+				let finger_proximity = data[1]
 				console.log(audio_file_no);
+				console.log(finger_proximity);
 				console.log('Loading Sound');
 				let audiopath = '../audios/' + String(audio_file_no) + '.wav';
 				console.log(audiopath);
 				const { sound } = await Audio.Sound.createAsync(AUDIOS[audio_file_no]);
 				setSound(sound);
-
 				console.log('Playing Sound');
 				await sound.playAsync();
+				Alert.alert(
+					"Finger Proximity",
+					"Thumb and Index Finger joined: " + String(finger_proximity[0]) + "\nIndex and Middle Finger joined: " + String(finger_proximity[1]) + "\nMiddle and Ring finger joined: " + String(finger_proximity[2]) + "\nRing and Pinky finger joined: " + String(finger_proximity[3]),
+					[
+						{
+							text: "Cancel",
+							style: "cancel",
+						},
+					],
+					{
+						cancelable: true,
+						onDismiss: () =>
+							Alert.alert(
+								"This alert was dismissed by tapping outside of the alert dialog."
+							),
+					}
+				);
 			})
 			.catch((err) => {
 				console.log("Err ", err);
@@ -136,6 +157,7 @@ export const Activity = ({ navigation, route }) => {
 				base64: true,
 				uri: photo.uri,
 			};
+			// const abs = await hands.send({ image: photo })
 			const abc = await sendToServer(obj);
 			MediaLibrary.saveToLibraryAsync(photo.uri).then(() => {
 				setPhoto(undefined);
@@ -162,8 +184,6 @@ export const Activity = ({ navigation, route }) => {
 		<Camera style={styles.container} ref={cameraRef}>
 			<View style={styles.buttonContainer}>
 				<Button
-					// contentStyle={{ height: 60, width: 500 }}
-					// labelStyle={{ color: "white", fontSize: 20 }}
 					title="Take Pic"
 					onPress={takePic}
 				/>

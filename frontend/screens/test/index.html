@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"
+      crossorigin="anonymous"
+    ></script>
+    <script type="module">
+      const imageElement = document.getElementsByClassName("input_image")[0];
+      const videoElement = document.getElementsByClassName("input_video")[0];
+      console.log("video element: ", videoElement);
+      const canvasElement = document.getElementsByClassName("output_canvas")[0];
+      const canvasCtx = canvasElement.getContext("2d");
+      var img = document.createElement("img");
+      img.src = "left_hand.jpg";
+      console.log("image", img);
+      function onResults(results) {
+        console.log("I AM CALLED");
+        canvasCtx.save();
+        console.log("Results: ", results);
+        canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        canvasCtx.drawImage(
+          results.image,
+          0,
+          0,
+          canvasElement.width,
+          canvasElement.height
+        );
+        if (results.multiHandLandmarks) {
+          for (const landmarks of results.multiHandLandmarks) {
+            drawConnectors(canvasCtx, landmarks, HAND_CONNECTIONS, {
+              color: "#00FF00",
+              lineWidth: 5,
+            });
+            drawLandmarks(canvasCtx, landmarks, {
+              color: "#FF0000",
+              lineWidth: 2,
+            });
+          }
+        }
+        const ans = results.multiHandLandmarks
+        console.log("ANS", ans[0]);
+        let output = 0
+        if(ans){
+          hand = ans[0]
+          console.log("HAND", hand);
+        }
+        canvasCtx.restore();
+      }
+
+      const hands = new Hands({
+        locateFile: (file) => {
+          return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+        },
+      });
+
+      hands.setOptions({
+        maxNumHands: 2,
+        modelComplexity: 1,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+      });
+      hands.onResults(onResults);
+
+      async function capture(){
+        const abs = await hands.send({ image: imageElement })
+        console.log(abs);
+        console.log("YOYOYO");
+      }
+      capture();
+    </script>
+  </head>
+
+  <body>
+    <div class="container">
+      <img src="left_hand.jpg" class="input_image" width="1280px" 1280 height="720">
+      <video class="input_video"></video>
+      <canvas class="output_canvas" width="1280px" height="720px"></canvas>
+    </div>
+  </body>
+</html>

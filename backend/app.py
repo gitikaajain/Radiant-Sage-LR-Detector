@@ -2,6 +2,7 @@ from flask import Flask, request
 # import flask_cors
 import cv2
 import test
+import angle
 from flask_cors import CORS, cross_origin
 from flask import jsonify
 
@@ -21,7 +22,7 @@ def scan():
     bytesOfImage = request.get_data()
     with open('image.jpeg', 'wb') as out:
         out.write(bytesOfImage)
-    return jsonify({"audio_no": test.scan_image(cv2.imread('./image.jpeg'))})
+    return jsonify({"data": angle.scan_image(cv2.imread('./image.jpeg'))})
     print("HELLOO")
     img = cv2.imread('./pictures/left_hand.jpg')
     
@@ -29,6 +30,6 @@ def scan():
     # test.scan_image(img)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)
 
 # print(test.scan_image(cv2.imread('./pictures/left_hand.jpg')))
